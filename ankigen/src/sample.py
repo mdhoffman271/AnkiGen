@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from functools import cache
 from typing import List, Optional
 
-from simplemma import text_lemmatizer  # type: ignore
+from ankigen.src.sentence import iter_words
 
 SINGLE_WORD_EFFORT = 30.0
 MINIMUM_EFFORT = 10.0
@@ -18,7 +18,7 @@ class Sample:
     @property
     @cache
     def all_tokens(self) -> List[str]:
-        return text_lemmatizer(self.text, lang=self.lang, greedy=True)
+        return list(iter_words(self.text, self.lang))
 
     @property
     @cache
