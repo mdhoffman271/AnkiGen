@@ -13,7 +13,6 @@ from ankigen.src.sentence import iter_sentences
 
 def iter_samples_from_epub(path: str, lang: str) -> Iterable[Sample]:
     book = epub.read_epub(path)
-
     for doc in book.get_items_of_type(ITEM_DOCUMENT):
         html = doc.get_content()
         soup = BeautifulSoup(html, 'html.parser')

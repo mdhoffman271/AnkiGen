@@ -4,6 +4,17 @@ from urllib.parse import quote, unquote, urlparse
 
 WIKTIONARY_URL_PATTERN = re.compile(r'https://en(?:\.m)?\.wiktionary.org/wiki/.*')
 
+WIKTIONARY_LANG_LANGUAGE_MAP = {
+    'de': 'German',
+    'en': 'English',
+    'es': 'Spanish',
+    'fr': 'French',
+}
+
+
+def get_language_from_lang(lang: str) -> Optional[str]:
+    return WIKTIONARY_LANG_LANGUAGE_MAP.get(lang, None)
+
 
 def is_wiktionary_url(url: str) -> bool:
     return bool(WIKTIONARY_URL_PATTERN.fullmatch(url))

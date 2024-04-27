@@ -4,9 +4,8 @@ import gzip
 import json
 from typing import Iterable
 
-from ankigen.src.language import get_language_from_lang
 from ankigen.src.sample import Sample
-from ankigen.src.wiktionary import get_url_from_token
+from ankigen.src.wiktionary import get_language_from_lang, get_url_from_token
 
 
 def iter_samples_from_kaikki(path: str, lang: str) -> Iterable[Sample]:
