@@ -6,7 +6,7 @@ from typing import Iterable
 
 from ankigen.src.language import get_language_from_lang
 from ankigen.src.sample import Sample
-from ankigen.src.wiktionary import get_url_from_word
+from ankigen.src.wiktionary import get_url_from_token
 
 
 def iter_samples_from_kaikki(path: str, lang: str) -> Iterable[Sample]:
@@ -22,7 +22,7 @@ def iter_samples_from_kaikki(path: str, lang: str) -> Iterable[Sample]:
             word = data.get('word', None)
             if word is None:
                 continue
-            url = get_url_from_word(word, language)
+            url = get_url_from_token(word, language)
             yield Sample(lang, word, url)
             for sense in data.get('senses', []):
                 for example in sense.get('examples', []):

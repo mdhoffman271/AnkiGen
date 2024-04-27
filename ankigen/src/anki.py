@@ -1,5 +1,3 @@
-from typing import TextIO
-
 
 def escape_str(text: str) -> str:
     return f'"{text.replace('"', '""')}"'

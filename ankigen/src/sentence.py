@@ -33,9 +33,15 @@ def iter_sentences(text: str, lang: str) -> Iterable[str]:
 WORD_PATTERN = re.compile(r'\w+')
 
 
-def iter_words(text: str, lang: str) -> Iterable[str]:
+def iter_lemmas(text: str, lang: str) -> Iterable[str]:
     return filter(WORD_PATTERN.fullmatch, text_lemmatizer(text, lang=lang, greedy=True))
 
 
-def is_valid_word(text: str, lang: str) -> bool:
+def iter_valid_lemmas(text: str, lang: str) -> Iterable[str]:
+    for lemma in iter_lemmas(text, lang):
+        if is_valid_lemma(lemma, lang):
+            yield lemma
+
+
+def is_valid_lemma(text: str, lang: str) -> bool:
     return is_known(text, lang)
