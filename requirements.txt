@@ -1,0 +1,13 @@
+beautifulsoup4==4.12.3
+click==8.1.7
+EbookLib==0.18
+joblib==1.4.0
+lxml==5.2.1
+nltk==3.8.1
+regex==2024.4.16
+setuptools==69.5.1
+simplemma==0.9.1
+six==1.16.0
+soupsieve==2.5
+tqdm==4.66.2
+wheel==0.43.0
