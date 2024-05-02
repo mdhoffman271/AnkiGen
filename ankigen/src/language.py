@@ -1,7 +1,7 @@
 
 
 import re
-from typing import Iterable, Optional
+from typing import Iterable
 
 from nltk.tokenize import sent_tokenize
 from simplemma import is_known, text_lemmatizer  # type: ignore

@@ -9,16 +9,17 @@ from ebooklib import ITEM_DOCUMENT, epub
 
 from ankigen.src.sample import Sample
 from ankigen.src.sentence import iter_sentences
+from ankigen.src.text import clean
 
 
 def iter_samples_from_epub(path: str, lang: str) -> Iterable[Sample]:
-    book = epub.read_epub(path)
+    book = epub.read_epub(path, {"ignore_ncx": True})
     for doc in book.get_items_of_type(ITEM_DOCUMENT):
         html = doc.get_content()
         soup = BeautifulSoup(html, 'html.parser')
         for paragraph in soup.find_all('p'):
             for sentence in iter_sentences(paragraph.get_text(), lang):
-                yield Sample(lang, sentence)
+                yield Sample(lang, clean(sentence))
 
 
 def iter_samples_in_root(root_path: str, lang: str) -> Iterable[Sample]:
