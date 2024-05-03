@@ -26,7 +26,7 @@ class InterestStore:
 
     def add_interest(self, interest: str) -> None:
         key = tuple(sorted(iter_valid_lemmas(interest, self._lang)))
-        if key not in self._interest_heap_map:
+        if key and key not in self._interest_heap_map:
             self._interest_heap_map[key] = list()
 
     def add_sample(self, sample: Sample) -> None:
