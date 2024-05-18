@@ -5,8 +5,8 @@ import json
 from typing import Iterable
 
 from ankigen.src.study.sample import Sample
-from ankigen.src.text import clean
-from ankigen.src.wiktionary import get_language_from_lang, get_url_from_token
+from ankigen.src.transform.text import clean
+from ankigen.src.format.wiktionary import get_language_from_lang, get_url_from_token
 
 
 def iter_samples_from_kaikki(path: str, lang: str) -> Iterable[Sample]:

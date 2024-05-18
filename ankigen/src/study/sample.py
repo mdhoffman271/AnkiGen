@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import cache
 from typing import List, Optional
 
-from ankigen.src.sentence import iter_lemmas
+from ankigen.src.transform.sentence import iter_lemmas
 
 SINGLE_WORD_EFFORT = 30.0
 MINIMUM_EFFORT = 10.0

@@ -1,4 +1,4 @@
-from urllib.parse import quote, unquote, urlparse
+from urllib.parse import quote
 
 
 def get_translation_url(text: str, source_lang: str, target_lang: str = 'en') -> str:

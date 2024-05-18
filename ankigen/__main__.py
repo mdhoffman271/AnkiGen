@@ -3,12 +3,12 @@
 import os
 import time
 
-from ankigen.src.anki import save_samples_as_anki
+from ankigen.src.format.anki import save_samples_as_anki
+from ankigen.src.format.wiktionary import get_token_from_url, is_wiktionary_url
 from ankigen.src.study.interest_store import InterestStore
 from ankigen.src.study.source.epub import iter_samples_in_root
 from ankigen.src.study.source.firefox import iter_firefox_wiktionary_urls
 from ankigen.src.study.source.kaikki import iter_samples_from_kaikki
-from ankigen.src.wiktionary import get_token_from_url, is_wiktionary_url
 
 for lang in ['de', 'es', 'fr']:
     print(f'Loading {lang}...')

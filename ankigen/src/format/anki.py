@@ -1,7 +1,7 @@
 
 from typing import Iterable
 
-from ankigen.src.google_translate import get_translation_url
+from ankigen.src.format.google_translate import get_translation_url
 from ankigen.src.study.sample import Sample
 
 
