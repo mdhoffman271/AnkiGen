@@ -7,8 +7,8 @@ from typing import Iterable
 from bs4 import BeautifulSoup
 from ebooklib import ITEM_DOCUMENT, epub
 
-from ankigen.src.sample import Sample
 from ankigen.src.sentence import iter_sentences
+from ankigen.src.study.sample import Sample
 from ankigen.src.text import clean
 
 

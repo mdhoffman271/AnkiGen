@@ -4,7 +4,7 @@ import gzip
 import json
 from typing import Iterable
 
-from ankigen.src.sample import Sample
+from ankigen.src.study.sample import Sample
 from ankigen.src.text import clean
 from ankigen.src.wiktionary import get_language_from_lang, get_url_from_token
 
