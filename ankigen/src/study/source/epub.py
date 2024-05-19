@@ -22,6 +22,6 @@ def iter_samples_from_epub(path: str, lang: str) -> Iterable[Sample]:
                 yield Sample(lang, clean(sentence))
 
 
-def iter_samples_in_root(root_path: str, lang: str) -> Iterable[Sample]:
+def iter_samples_from_epub_folder(root_path: str, lang: str) -> Iterable[Sample]:
     for epub_path in iglob(os.path.join(root_path, lang, '**', '*.epub'), recursive=True):
         yield from iter_samples_from_epub(epub_path, lang)
