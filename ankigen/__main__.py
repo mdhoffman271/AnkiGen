@@ -4,7 +4,7 @@ import os
 import time
 
 from ankigen.src.format.anki import save_samples_as_anki
-from ankigen.src.format.wiktionary import get_token_from_url, is_wiktionary_url
+from ankigen.src.format.wiktionary import get_token_from_url
 from ankigen.src.study.interest_store import InterestStore
 from ankigen.src.study.source.epub import iter_samples_from_epub_folder
 from ankigen.src.study.source.firefox import iter_firefox_wiktionary_urls
@@ -16,7 +16,7 @@ for lang in ['de', 'es', 'fr']:
     store = InterestStore(lang)
     start_time = time.time() - 61 * 24 * 60 * 60  # 2 months in the past
 
-    for url in filter(is_wiktionary_url, iter_firefox_wiktionary_urls('./data/firefox/places.sqlite', min_epoch=start_time)):
+    for url in iter_firefox_wiktionary_urls('./data/firefox/places.sqlite', min_epoch=start_time):
         text = get_token_from_url(url)
         store.add_interest(text)
 
