@@ -4,9 +4,9 @@ import os
 from glob import iglob
 from typing import Iterable
 
+from ankigen.src.language.sentence import iter_sentences
+from ankigen.src.language.text import clean
 from ankigen.src.study.sample import Sample
-from ankigen.src.transform.sentence import iter_sentences
-from ankigen.src.transform.text import clean
 
 
 def iter_samples_from_text(path: str, lang: str) -> Iterable[Sample]:

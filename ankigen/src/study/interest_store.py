@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from heapq import heappush, heappushpop
 from typing import Iterable
 
-from ankigen.src.transform.sentence import iter_valid_lemmas
+from ankigen.src.language.sentence import iter_valid_lemmas
 from ankigen.src.study.sample import Sample
 
 
