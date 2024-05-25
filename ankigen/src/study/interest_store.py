@@ -30,6 +30,9 @@ class InterestStore:
             self._interest_heap_map[key] = list()
 
     def add_sample(self, sample: Sample) -> None:
+        if sample.lang != self._lang:
+            return
+
         for interest, heap in self._interest_heap_map.items():
             for lemma in interest:
                 if lemma not in sample.unique_lemmas:
