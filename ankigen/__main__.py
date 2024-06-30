@@ -22,7 +22,7 @@ for lang in ['de', 'es', 'fr']:
 
     store.add_samples(iter_samples_from_epub_folder('./data/epub', lang))
     store.add_samples(iter_samples_from_text_folder('./data/text', lang))
-    store.add_samples(iter_samples_from_kaikki('./data/kaikki/raw-wiktextract-data.json.gz', lang))
+    store.add_samples(iter_samples_from_kaikki('./data/kaikki/raw-wiktextract-data.jsonl.gz', lang))
 
     path = f'./data/out/{lang}.txt'
     os.makedirs(os.path.dirname(path), exist_ok=True)
