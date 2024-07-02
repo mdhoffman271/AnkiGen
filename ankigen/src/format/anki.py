@@ -14,7 +14,9 @@ def save_samples_as_anki(path: str, samples: Iterable[Sample]) -> None:
         for sample in samples:
             front = sample.text
             back_parts = [f'<a href="{get_translation_url(sample.text, sample.lang)}">Translate</a>']
-            if sample.url is not None:
-                back_parts.append(f'<a href="{sample.url}">Source</a>')
+            if sample.source_url is not None:
+                back_parts.append(f'<a href="{sample.source_url}">Source</a>')
+            if sample.translation is not None:
+                back_parts.append(sample.translation)
             back = '<br><br>'.join(back_parts)
             file.write(f'{escape_str(front)};{escape_str(back)}\n')

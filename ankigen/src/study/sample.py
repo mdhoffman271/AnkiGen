@@ -14,7 +14,8 @@ MINIMUM_EFFORT = 10.0
 class Sample:
     lang: str
     text: str
-    url: Optional[str] = None
+    source_url: Optional[str] = None
+    translation: Optional[str] = None
 
     @property
     @cache

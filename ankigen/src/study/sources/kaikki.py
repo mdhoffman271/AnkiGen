@@ -27,5 +27,6 @@ def iter_samples_from_kaikki(path: str, lang: str) -> Iterable[Sample]:
             for sense in data.get('senses', []):
                 for example in sense.get('examples', []):
                     text = example.get('text', None)
+                    translation = example.get('english', None)
                     if text is not None:
-                        yield Sample(lang, clean(text), url)
+                        yield Sample(lang, clean(text), url, translation)
