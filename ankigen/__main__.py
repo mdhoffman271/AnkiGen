@@ -48,11 +48,19 @@ class LazyLoader:
         self.samples = itertools.chain(self.samples, samples)
 
 
+def print_help() -> None:
+    print('todo')
+
+
 def parse_all(args: Args) -> None:
-    lang = args[0]
+    if len(args) == 0 or args[0] in ('-h', '--help'):
+        print_help()
+        return
+
+    lang, args = get_first_arg(args)
 
     loader = LazyLoader(lang)
-    parse_remainder(loader, args[1:])
+    parse_remainder(loader, args)
 
     store = InterestStore(lang)
 
