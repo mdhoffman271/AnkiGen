@@ -33,6 +33,10 @@ class InterestStore:
         if key and key not in self._interest_heap_map:
             self._interest_heap_map[key] = list()
 
+    def add_interests(self, interests: Iterable[str]) -> None:
+        for interest in interests:
+            self.add_interest(interest)
+
     def add_sample(self, sample: Sample) -> None:
         if sample.lang != self._lang:
             return
