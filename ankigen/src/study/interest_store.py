@@ -24,6 +24,10 @@ class InterestStore:
         self._max_samples = max_samples
         self._interest_heap_map: dict[InterestStore.INTEREST, InterestStore.HEAP] = dict()
 
+    @property
+    def lang(self) -> str:
+        return self._lang
+
     def add_interest(self, interest: str) -> None:
         key = tuple(sorted(iter_valid_lemmas(interest, self._lang)))
         if key and key not in self._interest_heap_map:
