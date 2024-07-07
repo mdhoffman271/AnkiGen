@@ -1,7 +1,4 @@
 
-
-import os
-from glob import iglob
 from typing import Iterable
 
 from ankigen.src.language.sentence import iter_sentences
@@ -14,8 +11,3 @@ def iter_samples_from_text(path: str, lang: str) -> Iterable[Sample]:
         text = file.read()
         for sentence in iter_sentences(text, lang):
             yield Sample(lang, clean(sentence))
-
-
-def iter_samples_from_text_folder(root_path: str, lang: str) -> Iterable[Sample]:
-    for text_path in iglob(os.path.join(root_path, lang, '**', '*.txt'), recursive=True):
-        yield from iter_samples_from_text(text_path, lang)

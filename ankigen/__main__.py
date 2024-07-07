@@ -3,20 +3,21 @@ import itertools
 import os
 import sys
 import time
+from glob import iglob
 from typing import Iterable, Optional
 
 from ankigen.src.format.anki import save_samples_as_anki
 from ankigen.src.format.wiktionary import get_token_from_url
 from ankigen.src.study.interest_store import InterestStore
 from ankigen.src.study.sample import Sample
-from ankigen.src.study.sources.epub import iter_samples_from_epub_folder
+from ankigen.src.study.sources.epub import iter_samples_from_epub
 from ankigen.src.study.sources.firefox import iter_firefox_wiktionary_urls
 from ankigen.src.study.sources.kaikki import iter_samples_from_kaikki
-from ankigen.src.study.sources.text import iter_samples_from_text_folder
+from ankigen.src.study.sources.text import iter_samples_from_text
 
 # argparse wasn't doing what I wanted, so I wrote some custom stuff here.
 # Example:
-# python -m ankigen es --epub ./data/epub --text ./data/text --kaikki ./data/kaikki/raw-wiktextract-data.jsonl.gz
+# python -m ankigen es --epub "./data/epub/es/*.epub" --text "./data/text/es/*.txt" --kaikki "./data/kaikki/raw-wiktextract-data.jsonl.gz"
 
 Args = list[str]
 
@@ -24,6 +25,10 @@ Args = list[str]
 def exit_with_reason(text: str) -> None:
     print(text)
     exit(0)  # todo this should probably not be 0
+
+
+def iter_glob_paths(text: str) -> Iterable[str]:
+    return iglob(text, recursive=True)
 
 
 class LazyLoader:
@@ -52,6 +57,7 @@ def parse_all(args: Args) -> None:
     store = InterestStore(lang)
 
     # todo should probably rewrite this somehow to guarantee add_interests before add_samples
+    print('Loading interests...')
     store.add_interests(loader.interests)
 
     # todo make param
@@ -62,6 +68,7 @@ def parse_all(args: Args) -> None:
         text = get_token_from_url(url)
         store.add_interest(text)
 
+    print('Loading samples...')
     store.add_samples(loader.samples)
 
     # todo make param
@@ -87,30 +94,36 @@ def parse_remainder(loader: LazyLoader, args: Args) -> LazyLoader:
 
 
 def parse_epub(loader: LazyLoader, args: Args) -> LazyLoader:
-    path, args = args[0], args[1:]
+    glob, args = args[0], args[1:]
+    loader = parse_remainder(loader, args)
 
-    print(f'Using epub samples from path: {path}.')
-    loader.add_samples(iter_samples_from_epub_folder(path, loader.lang))
+    for path in iter_glob_paths(glob):
+        print(f'Using epub samples from path: {path}.')
+        loader.add_samples(iter_samples_from_epub(path, loader.lang))
 
-    return parse_remainder(loader, args)
+    return loader
 
 
 def parse_text(loader: LazyLoader, args: Args) -> LazyLoader:
-    path, args = args[0], args[1:]
+    glob, args = args[0], args[1:]
+    loader = parse_remainder(loader, args)
 
-    print(f'Using text samples from path: {path}.')
-    loader.add_samples(iter_samples_from_text_folder(path, loader.lang))
+    for path in iter_glob_paths(glob):
+        print(f'Using text samples from path: {path}.')
+        loader.add_samples(iter_samples_from_text(path, loader.lang))
 
-    return parse_remainder(loader, args)
+    return loader
 
 
 def parse_kaikki(loader: LazyLoader, args: Args) -> LazyLoader:
-    path, args = args[0], args[1:]
+    glob, args = args[0], args[1:]
+    loader = parse_remainder(loader, args)
 
-    print(f'Using Kaikki samples from path: {path}.')
-    loader.add_samples(iter_samples_from_kaikki(path, loader.lang))
+    for path in iter_glob_paths(glob):
+        print(f'Using Kaikki samples from path: {path}.')
+        loader.add_samples(iter_samples_from_kaikki(path, loader.lang))
 
-    return parse_remainder(loader, args)
+    return loader
 
 
 parse_all(sys.argv[1:])

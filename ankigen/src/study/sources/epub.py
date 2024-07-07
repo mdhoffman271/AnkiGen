@@ -1,7 +1,4 @@
 
-
-import os
-from glob import iglob
 from typing import Iterable
 
 from bs4 import BeautifulSoup
@@ -20,8 +17,3 @@ def iter_samples_from_epub(path: str, lang: str) -> Iterable[Sample]:
         for paragraph in soup.find_all('p'):
             for sentence in iter_sentences(paragraph.get_text(), lang):
                 yield Sample(lang, clean(sentence))
-
-
-def iter_samples_from_epub_folder(root_path: str, lang: str) -> Iterable[Sample]:
-    for epub_path in iglob(os.path.join(root_path, lang, '**', '*.epub'), recursive=True):
-        yield from iter_samples_from_epub(epub_path, lang)
