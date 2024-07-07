@@ -11,18 +11,18 @@ from ankigen.src.format.wiktionary import get_token_from_url
 from ankigen.src.study.interest_store import InterestStore
 from ankigen.src.study.sample import Sample
 from ankigen.src.study.sources.epub import iter_samples_from_epub
-from ankigen.src.study.sources.firefox import iter_firefox_wiktionary_urls
+from ankigen.src.study.sources.firefox import iter_firefox_wiktionary_interests
 from ankigen.src.study.sources.kaikki import iter_samples_from_kaikki
 from ankigen.src.study.sources.text import iter_samples_from_text
 
 # argparse wasn't doing what I wanted, so I wrote some custom stuff here.
 # Example:
-# python -m ankigen es --epub "./data/epub/es/*.epub" --text "./data/text/es/*.txt" --kaikki "./data/kaikki/raw-wiktextract-data.jsonl.gz"
+# python -m ankigen es --epub "./data/epub/es/*.epub" --text "./data/text/es/*.txt" --kaikki "./data/kaikki/raw-wiktextract-data.jsonl.gz" --firefox "./data/firefox/places.sqlite" 61 0
 
 Args = list[str]
 
 
-def exit_with_reason(text: str) -> None:
+def exit_with_reason(text: str) -> Exception:
     print(text)
     exit(0)  # todo this should probably not be 0
 
@@ -60,14 +60,6 @@ def parse_all(args: Args) -> None:
     print('Loading interests...')
     store.add_interests(loader.interests)
 
-    # todo make param
-    start_time = time.time() - 61 * 24 * 60 * 60  # 2 months in the past
-
-    # todo make param
-    for url in iter_firefox_wiktionary_urls('./data/firefox/places.sqlite', min_epoch=start_time):
-        text = get_token_from_url(url)
-        store.add_interest(text)
-
     print('Loading samples...')
     store.add_samples(loader.samples)
 
@@ -81,20 +73,53 @@ def parse_remainder(loader: LazyLoader, args: Args) -> LazyLoader:
     if len(args) == 0:
         return loader
     func_map = {
+        '--firefox': parse_firefox,
         '--epub': parse_epub,
         '--text': parse_text,
-        '--kaikki': parse_kaikki
+        '--kaikki': parse_kaikki,
     }
     name, args = args[0], args[1:]
     parse_func = func_map.get(name, None)
     if parse_func is None:
-        exit_with_reason(f'Unexpected arg: {name}')
-        return loader
+        raise exit_with_reason(f'Unexpected arg: {name}')
     return parse_func(loader, args)
 
 
+def get_n_args(args: Args, count: int) -> tuple[list[str], Args]:
+    if len(args) < count:
+        err = f'Unexpected number of args. Expected {count} arg(s).\nStarting at:\n\t{''.join(args[:5])}'
+        raise exit_with_reason(err)
+    return args[:count], args[count:]
+
+
+def get_first_arg(args: Args) -> tuple[str, Args]:
+    first, args = get_n_args(args, 1)
+    return first[0], args
+
+
+def get_time_from_days(text: str) -> float:
+    try:
+        num = float(text)
+    except ValueError:
+        raise exit_with_reason(f'Could not convert value to number: {text}')
+    return time.time() - num * 24 * 60 * 60
+
+
+def parse_firefox(loader: LazyLoader, args: Args) -> LazyLoader:
+    (glob, start, end), args = get_n_args(args, 3)
+    start = get_time_from_days(start)
+    end = get_time_from_days(end)
+    parse_remainder(loader, args)
+
+    for path in iter_glob_paths(glob):
+        print(f'Using Firefox interests from path: {path}.')
+        loader.add_interests(iter_firefox_wiktionary_interests(path, start, end))
+
+    return loader
+
+
 def parse_epub(loader: LazyLoader, args: Args) -> LazyLoader:
-    glob, args = args[0], args[1:]
+    glob, args = get_first_arg(args)
     loader = parse_remainder(loader, args)
 
     for path in iter_glob_paths(glob):
@@ -105,7 +130,7 @@ def parse_epub(loader: LazyLoader, args: Args) -> LazyLoader:
 
 
 def parse_text(loader: LazyLoader, args: Args) -> LazyLoader:
-    glob, args = args[0], args[1:]
+    glob, args = get_first_arg(args)
     loader = parse_remainder(loader, args)
 
     for path in iter_glob_paths(glob):
@@ -116,7 +141,7 @@ def parse_text(loader: LazyLoader, args: Args) -> LazyLoader:
 
 
 def parse_kaikki(loader: LazyLoader, args: Args) -> LazyLoader:
-    glob, args = args[0], args[1:]
+    glob, args = get_first_arg(args)
     loader = parse_remainder(loader, args)
 
     for path in iter_glob_paths(glob):
