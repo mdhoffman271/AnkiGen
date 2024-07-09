@@ -7,7 +7,6 @@ from glob import iglob
 from typing import Iterable, Optional
 
 from ankigen.src.format.anki import save_samples_as_anki
-from ankigen.src.format.wiktionary import get_token_from_url
 from ankigen.src.study.interest_store import InterestStore
 from ankigen.src.study.sample import Sample
 from ankigen.src.study.sources.epub import iter_samples_from_epub
@@ -17,13 +16,18 @@ from ankigen.src.study.sources.text import iter_samples_from_text
 
 # argparse wasn't doing what I wanted, so I wrote some custom stuff here.
 # Example:
-# python -m ankigen es --epub "./data/epub/es/*.epub" --text "./data/text/es/*.txt" --kaikki "./data/kaikki/raw-wiktextract-data.jsonl.gz" --firefox "./data/firefox/places.sqlite" 61 0
+# python -m ankigen es ./data/out/ --epub "./data/epub/es/*.epub" --text "./data/text/es/*.txt" --kaikki "./data/kaikki/raw-wiktextract-data.jsonl.gz" --firefox "./data/firefox/places.sqlite" 61 0
 
 Args = list[str]
 
 
+def print_help() -> None:
+    print('todo')
+
+
 def exit_with_reason(text: str) -> Exception:
     print(text)
+    print_help()
     exit(0)  # todo this should probably not be 0
 
 
@@ -48,16 +52,12 @@ class LazyLoader:
         self.samples = itertools.chain(self.samples, samples)
 
 
-def print_help() -> None:
-    print('todo')
-
-
 def parse_all(args: Args) -> None:
-    if len(args) == 0 or args[0] in ('-h', '--help'):
-        print_help()
-        return
+    (lang, out_path), args = get_n_args(args, 2)
 
-    lang, args = get_first_arg(args)
+    if out_path.endswith(os.path.sep) or out_path.endswith('.'):
+        out_path = os.path.join(out_path, f'{lang}.txt')
+    out_path = os.path.abspath(out_path)
 
     loader = LazyLoader(lang)
     parse_remainder(loader, args)
@@ -71,10 +71,8 @@ def parse_all(args: Args) -> None:
     print('Loading samples...')
     store.add_samples(loader.samples)
 
-    # todo make param
-    path = f'./data/out/{lang}.txt'
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    save_samples_as_anki(path, store.iter_samples())
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    save_samples_as_anki(out_path, store.iter_samples())
 
 
 def parse_remainder(loader: LazyLoader, args: Args) -> LazyLoader:
@@ -95,8 +93,10 @@ def parse_remainder(loader: LazyLoader, args: Args) -> LazyLoader:
 
 def get_n_args(args: Args, count: int) -> tuple[list[str], Args]:
     if len(args) < count:
-        err = f'Unexpected number of args. Expected {count} arg(s).\nStarting at:\n\t{''.join(args[:5])}'
-        raise exit_with_reason(err)
+        lines = ['Unexpected number of args', f'Expected {count} arg(s).']
+        if len(args) > 0:
+            lines.append('Starting at:\n\t{''.join(args[:5])}')
+        raise exit_with_reason('\n'.join(lines))
     return args[:count], args[count:]
 
 
