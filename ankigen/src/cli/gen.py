@@ -10,6 +10,7 @@ from typing import Any, Iterable, Optional
 
 from ankigen.src.format.anki import save_samples_as_anki
 from ankigen.src.study.interest_store import InterestStore
+from ankigen.src.study.sample_store import SampleStore
 from ankigen.src.study.sources.epub import iter_samples_from_epub
 from ankigen.src.study.sources.firefox import iter_firefox_wiktionary_interests
 from ankigen.src.study.sources.kaikki import iter_samples_from_kaikki
@@ -26,20 +27,21 @@ def generate_anki(lang: str, spec_path: str, out_path: str) -> None:
         interest_actions += iter_interests(glob, options)
         sample_actions += iter_samples(glob, lang, options)
 
-    store = InterestStore(lang)
+    interest_store = InterestStore(lang)
 
-    # todo should probably rewrite this to guarantee add_interests before add_samples
     print('Loading interests ...')
     for action in interest_actions:
-        action.execute(store)
+        action.execute(interest_store)
+
+    sample_store = interest_store.sample_store()
 
     print('Loading samples ...')
     for action in sample_actions:
-        action.execute(store)
+        action.execute(sample_store)
 
     print(f'Writing to file {out_path}')
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    save_samples_as_anki(out_path, store.iter_samples())
+    save_samples_as_anki(out_path, sample_store.iter_samples())
 
 
 JsonLike = Any
@@ -103,7 +105,7 @@ class FirefoxAction(InterestAction):
 
 class SampleAction(ABC):
     @abstractmethod
-    def execute(self, interest_store: InterestStore) -> None:
+    def execute(self, interest_store: SampleStore) -> None:
         raise NotImplementedError()
 
 
@@ -113,7 +115,7 @@ class EpubAction(SampleAction):
         self.glob = glob
         self.lang = lang
 
-    def execute(self, interest_store: InterestStore) -> None:
+    def execute(self, interest_store: SampleStore) -> None:
         for path in iter_glob_paths(self.glob):
             print(f'Loading epub data from {path} ...')
             interest_store.add_samples(iter_samples_from_epub(path, self.lang))
@@ -130,7 +132,7 @@ class KaikkiAction(SampleAction):
         self.glob = glob
         self.lang = lang
 
-    def execute(self, interest_store: InterestStore) -> None:
+    def execute(self, interest_store: SampleStore) -> None:
         for path in iter_glob_paths(self.glob):
             print(f'Loading Kaikki data from {path} ...')
             interest_store.add_samples(iter_samples_from_kaikki(path, self.lang))
@@ -147,7 +149,7 @@ class TextAction(SampleAction):
         self.glob = glob
         self.lang = lang
 
-    def execute(self, interest_store: InterestStore) -> None:
+    def execute(self, interest_store: SampleStore) -> None:
         for path in iter_glob_paths(self.glob):
             print(f'Loading text data from {path} ...')
             interest_store.add_samples(iter_samples_from_text(path, self.lang))

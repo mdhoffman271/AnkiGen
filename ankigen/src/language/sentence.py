@@ -43,5 +43,12 @@ def iter_valid_lemmas(text: str, lang: str) -> Iterable[str]:
             yield lemma
 
 
+UniqueLemmaVector = tuple[str, ...]
+
+
+def unique_lemma_vector(text: str, lang: str) -> UniqueLemmaVector:
+    return tuple(sorted(iter_valid_lemmas(text, lang)))
+
+
 def is_valid_lemma(text: str, lang: str) -> bool:
     return is_known(text, lang)

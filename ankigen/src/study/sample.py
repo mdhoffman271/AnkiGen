@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import cache
-from typing import List, Optional
+from typing import Optional
 
 from ankigen.src.language.sentence import iter_lemmas
 
@@ -19,12 +19,10 @@ class Sample:
 
     @property
     @cache
-    def all_lemmas(self) -> List[str]:
-        return list(iter_lemmas(self.text, self.lang))
+    def all_lemmas(self) -> tuple[str, ...]:
+        return tuple(iter_lemmas(self.text, self.lang))
 
-    @property
-    @cache
-    def unique_lemmas(self) -> set[str]:
+    def get_unique_lemmas(self) -> set[str]:
         return set(self.all_lemmas)
 
     @property
