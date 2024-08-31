@@ -4,6 +4,7 @@ import sqlite3
 from typing import Iterable
 
 from ankigen.src.format.wiktionary import get_token_from_url, is_wiktionary_url
+from ankigen.src.study.interest import Interest
 
 
 def iter_firefox_wiktionary_urls(path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[str]:
@@ -20,6 +21,8 @@ def iter_firefox_wiktionary_urls(path: str, start_time=float('-inf'), end_time=f
     conn.close()
 
 
-def iter_firefox_wiktionary_interests(path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[str]:
+def iter_firefox_wiktionary_interests(path: str, langs: set[str], start_time=float('-inf'), end_time=float('inf')) -> Iterable[Interest]:
     for url in iter_firefox_wiktionary_urls(path, start_time, end_time):
-        yield get_token_from_url(url)
+        token = get_token_from_url(url)
+        for lang in langs:
+            yield Interest.from_text(token, lang)

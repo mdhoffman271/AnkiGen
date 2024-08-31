@@ -16,9 +16,8 @@ def main():
 
     gen_parser = subparsers.add_parser('gen')
     gen_parser.set_defaults(func=gen)
-    gen_parser.add_argument('lang', type=str)
     gen_parser.add_argument('spec_path', type=str)
-    gen_parser.add_argument('out_path', type=str)
+    gen_parser.add_argument('out_dir', type=str)
 
     command_names = ', '.join(subparsers.choices.keys())
     main_parser.epilog = f'For more info: "ankigen {{{command_names}}} --help"'
@@ -28,17 +27,13 @@ def main():
 
 
 def gen(args: argparse.Namespace):
-    lang = args.lang
     spec_path = args.spec_path
-    out_path = args.out_path
-
-    if out_path.endswith(os.path.sep) or out_path.endswith('.'):
-        out_path = os.path.join(out_path, f'{lang}.txt')
+    out_dir = args.out_dir
 
     spec_path = os.path.abspath(spec_path)
-    out_path = os.path.abspath(out_path)
+    out_dir = os.path.abspath(out_dir)
 
-    generate_anki(lang, spec_path, out_path)
+    generate_anki(spec_path, out_dir)
 
 
 def build(_: argparse.Namespace):
