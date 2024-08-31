@@ -1,11 +1,11 @@
 
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from glob import iglob
 import json
 import os
 import time
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from glob import iglob
 from typing import Any, Iterable, Optional
 
 from ankigen.src.format.anki import save_samples_as_anki
@@ -45,7 +45,7 @@ def generate_anki(spec_path: str, out_dir: str) -> None:
         file_name = f'{lang}.txt'
         out_path = os.path.join(out_dir, file_name)
         print(f'Writing to {file_name} ...')
-        save_samples_as_anki(out_path, sample_store.iter_samples())
+        save_samples_as_anki(out_path, filter(lambda s: s.lang == lang, sample_store.iter_samples()))
 
 
 JsonLike = Any
