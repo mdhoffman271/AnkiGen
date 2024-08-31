@@ -18,7 +18,7 @@ def iter_samples_from_kaikki(path: str, langs: Iterable[str]) -> Iterable[Sample
                 data = json.loads(line)
                 lang = data['lang_code']
                 language = lang_language_map.get(lang, None)
-                if language is not None:
+                if language is None:
                     continue
                 word = data.get('word', None)
                 if word is None:
