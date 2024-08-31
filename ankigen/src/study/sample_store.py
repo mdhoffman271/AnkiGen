@@ -31,6 +31,10 @@ class SampleStore:
             samples.pop(i)
 
     def add_samples(self, samples: Iterable[Sample]) -> None:
+        # This is much faster when the same lang is used twice in a row.
+        # TODO fix root cause and remove this sorting.
+        samples = list(samples)
+        samples.sort(key=lambda s: s.lang)
         for sample in samples:
             self.add_sample(sample)
 

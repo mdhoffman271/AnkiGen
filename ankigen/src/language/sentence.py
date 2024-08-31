@@ -1,4 +1,5 @@
 import re
+import time
 from typing import Iterable
 
 from nltk.tokenize import sent_tokenize
@@ -34,7 +35,13 @@ WORD_PATTERN = re.compile(r'\w+')
 
 
 def iter_lemmas(text: str, lang: str) -> Iterable[str]:
-    return filter(WORD_PATTERN.fullmatch, text_lemmatizer(text, lang=lang, greedy=True))
+    # TODO this is VERY slow when the lang is different each time.
+    start_time = time.time()
+    lemmas = text_lemmatizer(text, lang=lang, greedy=True)
+    duration = time.time() - start_time
+    if duration > 0.01:
+        print(f'WARNING: Lemmatization took {duration:.2f}s.')
+    return filter(WORD_PATTERN.fullmatch, lemmas)
 
 
 def iter_valid_lemmas(text: str, lang: str) -> Iterable[str]:
