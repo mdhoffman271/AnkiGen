@@ -1,44 +1,45 @@
+import time
+from glob import iglob
+from itertools import chain, islice
+from typing import Iterable
+
+from ankigen.src.data.anki import save_samples_as_anki
+from ankigen.src.study.context import ActiveContext
+from ankigen.src.study.sources.epub import iter_samples_from_epub
+from ankigen.src.study.sources.firefox import iter_firefox_wiktionary_interests
+from ankigen.src.study.sources.kaikki import iter_samples_from_kaikki
+from ankigen.src.study.sources.text import iter_samples_from_text
+from ankigen.src.study.store import Store
 
 
-import argparse
-import os
-
-from ankigen.src.cli.gen import generate_anki
-
-
-# todo help text
 def main():
-    main_parser = argparse.ArgumentParser()
-    subparsers = main_parser.add_subparsers(required=True)
-
-    build_parser = subparsers.add_parser('build')
-    build_parser.set_defaults(func=build)
-
-    gen_parser = subparsers.add_parser('gen')
-    gen_parser.set_defaults(func=gen)
-    gen_parser.add_argument('spec_path', type=str)
-    gen_parser.add_argument('out_dir', type=str)
-
-    command_names = ', '.join(subparsers.choices.keys())
-    main_parser.epilog = f'For more info: "ankigen {{{command_names}}} --help"'
-
-    args = main_parser.parse_args()
-    args.func(args)
+    for lang in ['de', 'es', 'fr']:
+        load(lang)
 
 
-def gen(args: argparse.Namespace):
-    spec_path = args.spec_path
-    out_dir = args.out_dir
+def load(lang: str):
+    ActiveContext.lang = lang
+    sample_iterables = []
 
-    spec_path = os.path.abspath(spec_path)
-    out_dir = os.path.abspath(out_dir)
+    for path in iter_paths(f'./data/epub/{lang}/**/*.epub'):
+        sample_iterables.append(iter_samples_from_epub(path))
 
-    generate_anki(spec_path, out_dir)
+    for path in iter_paths(f'./data/kaikki/raw-wiktextract-data.jsonl.gz'):
+        sample_iterables.append(iter_samples_from_kaikki(path))
+
+    for path in iter_paths(f'./data/text/{lang}/**/*.txt'):
+        sample_iterables.append(iter_samples_from_text(path))
+
+    samples = chain(*sample_iterables)
+    interests = iter_firefox_wiktionary_interests('./data/firefox/places.sqlite', time.time() - 61 * 24 * 60 * 60)
+
+    store = Store()
+    out_path = f'./data/out/{lang}.text'
+    save_samples_as_anki(out_path, store.filter(samples, interests), lang)
 
 
-def build(_: argparse.Namespace):
-    # this will be an interactive tool to generate json/yaml
-    raise NotImplementedError()
+def iter_paths(glob: str) -> Iterable[str]:
+    return iglob(glob, recursive=True)
 
 
 main()

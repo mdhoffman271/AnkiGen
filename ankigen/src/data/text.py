@@ -1,4 +1,3 @@
-
 import re
 
 SPACE_PATTERN = re.compile(r'\s+')

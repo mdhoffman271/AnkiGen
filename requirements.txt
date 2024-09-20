@@ -10,4 +10,5 @@ simplemma==0.9.1
 six==1.16.0
 soupsieve==2.5
 tqdm==4.66.2
+validators==0.34.0
 wheel==0.43.0

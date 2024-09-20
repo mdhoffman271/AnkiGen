@@ -1,9 +1,7 @@
-
-
 import sqlite3
 from typing import Iterable
 
-from ankigen.src.format.wiktionary import get_token_from_url, is_wiktionary_url
+from ankigen.src.data.wiktionary import get_text_from_url, is_wiktionary_url
 from ankigen.src.study.interest import Interest
 
 
@@ -21,15 +19,6 @@ def iter_firefox_wiktionary_urls(path: str, start_time=float('-inf'), end_time=f
     conn.close()
 
 
-def iter_firefox_wiktionary_interests(path: str, langs: set[str], start_time=float('-inf'), end_time=float('inf')) -> Iterable[Interest]:
-    # for url in iter_firefox_wiktionary_urls(path, start_time, end_time):
-    #     token = get_token_from_url(url)
-    #     for lang in langs:
-    #         yield Interest.from_text(token, lang)
-
-    # This is slow when the lang changes.
-    # TODO fix root cause and remove this.
-    tokens = [get_token_from_url(url) for url in iter_firefox_wiktionary_urls(path, start_time, end_time)]
-    for lang in langs:
-        for token in tokens:
-            yield Interest.from_text(token, lang)
+def iter_firefox_wiktionary_interests(path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[Interest]:
+    for url in iter_firefox_wiktionary_urls(path, start_time, end_time):
+        yield Interest.from_text(get_text_from_url(url))
