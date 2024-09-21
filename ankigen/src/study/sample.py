@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Optional
 
 from ankigen.src.study.lemmatization import Lemmatization
