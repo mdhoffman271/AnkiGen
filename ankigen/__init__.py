@@ -1,3 +1,4 @@
 import nltk
 
-nltk.download('punkt', quiet=True)
+# Download nltk data.
+nltk.download('punkt_tab', quiet=True)
