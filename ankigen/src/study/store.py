@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Optional
 
 from ankigen.src.study.interest import Interest
 from ankigen.src.study.lemmatization import LemmaCollection, Lemmatization
@@ -30,14 +30,7 @@ class Store:
         for sample in samples:
             key = sample.lemmatization
             other = cache.get(key, None)
-            if (other is None
-                    or sample.source is not None and other.source is None
-                    or sample.english is not None and other.english is None
-                    or len(sample.text) < len(other.text)
-                ):
-                cache[key] = sample
-            else:
-                cache[key] = other
+            cache[key] = _better_sample(sample, other)
 
         # Shorten to max_samples.
         return sorted(cache.values(), key=lambda x: x.effort)[:self.max_samples]
@@ -48,3 +41,27 @@ def _is_match(sample_lemma_set: set[str], interest_lemmas: LemmaCollection) -> b
         if lemma not in sample_lemma_set:
             return False
     return True
+
+
+def _better_sample(sample: Sample, other: Optional[Sample]) -> Sample:
+    if other is None:
+        return sample
+    sample_score = _data_score(sample)
+    other_score = _data_score(other)
+
+    # Return the best sample, using len(text) as a tie-breaker.
+    if sample_score > other_score:
+        return sample
+    elif sample_score == other_score and len(sample.text) < len(other.text):
+        return sample
+    else:
+        return other
+
+
+def _data_score(sample: Sample) -> int:
+    score = 0
+    if sample.source is not None:
+        score += 2
+    if sample.english is not None:
+        score += 1
+    return score
