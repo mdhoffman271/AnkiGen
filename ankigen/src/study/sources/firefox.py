@@ -5,7 +5,7 @@ from ankigen.src.data.wiktionary import get_text_from_url, is_wiktionary_url
 from ankigen.src.study.interest import Interest
 
 
-def iter_firefox_wiktionary_urls(path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[str]:
+def iter_urls_from_firefox_wiktionary(path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[str]:
     conn = sqlite3.connect(path)
     query = r"SELECT url FROM moz_places WHERE url LIKE '%wiktionary.org/wiki/%'"
     if start_time > float('-inf'):
@@ -19,6 +19,6 @@ def iter_firefox_wiktionary_urls(path: str, start_time=float('-inf'), end_time=f
     conn.close()
 
 
-def iter_firefox_wiktionary_interests(path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[Interest]:
-    for url in iter_firefox_wiktionary_urls(path, start_time, end_time):
+def iter_interests_from_firefox_wiktionary(path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[Interest]:
+    for url in iter_urls_from_firefox_wiktionary(path, start_time, end_time):
         yield Interest.from_text(get_text_from_url(url))

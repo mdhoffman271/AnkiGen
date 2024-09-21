@@ -7,7 +7,7 @@ from ankigen.src.study.context import ActiveContext
 from ankigen.src.study.interest import Interest
 from ankigen.src.study.sample import Sample
 from ankigen.src.study.sources.epub import iter_samples_from_epub
-from ankigen.src.study.sources.firefox import iter_firefox_wiktionary_interests
+from ankigen.src.study.sources.firefox import iter_interests_from_firefox_wiktionary
 from ankigen.src.study.sources.kaikki import iter_samples_from_kaikki
 from ankigen.src.study.sources.text import iter_samples_from_text
 from ankigen.src.study.store import Store
@@ -38,7 +38,7 @@ class AnkiBuilder:
     def with_firefox_wiktionary(self, path: str, past_day_count: float) -> Self:
         def func() -> Iterable[Interest]:
             self._log_func(f"loading interests (firefox_wiktionary) from '{path}' ...")
-            return iter_firefox_wiktionary_interests(path, time.time() - past_day_count * 24 * 60 * 60)
+            return iter_interests_from_firefox_wiktionary(path, time.time() - past_day_count * 24 * 60 * 60)
         self._interest_generators.append(func)
         return self
 
@@ -60,7 +60,7 @@ class AnkiBuilder:
 
     def with_kaikki(self, path: str) -> Self:
         def func() -> Iterable[Sample]:
-            self._log_func(f"laoding samples (kaikki) from '{path}' ...")
+            self._log_func(f"loading samples (kaikki) from '{path}' ...")
             yield from iter_samples_from_kaikki(path)
         self._sample_generators.append(func)
         return self
