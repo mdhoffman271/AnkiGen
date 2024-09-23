@@ -14,7 +14,6 @@ from ankigen.src.study.store import Store
 
 
 class AnkiBuilder:
-
     def __init__(self, lang: str, log_func: Optional[Callable[[str], None]] = print) -> None:
         if log_func is None:
             log_func = _no_log
@@ -27,13 +26,13 @@ class AnkiBuilder:
     def generate(self, path: str) -> None:
         if path.endswith('/') or path.endswith('\\'):
             path += f'{self._lang}.txt'
-        ActiveContext.lang = self._lang  # todo add lock or something
-        store = Store()
-        self._log_func(f"starting generate (lang: '{self._lang}') ...")
-        samples = store.filter(self._iter_samples(), self._iter_interests())
-        self._log_func(f"saving samples to {path} ...")
-        save_samples_as_anki(path, samples, self._lang)
-        self._log_func("done")
+        with ActiveContext.lock(self._lang):
+            store = Store()
+            self._log_func(f"starting generate (lang: '{self._lang}') ...")
+            samples = store.filter(self._iter_samples(), self._iter_interests())
+            self._log_func(f"saving samples to {path} ...")
+            save_samples_as_anki(path, samples, self._lang)
+            self._log_func("done")
 
     def with_firefox_wiktionary(self, path: str, past_day_count: float) -> Self:
         def func() -> Iterable[Interest]:

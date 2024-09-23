@@ -1,23 +1,48 @@
 import re
-from typing import Iterable
+from threading import Lock
+from typing import Iterable, Optional, Self
 
+# These dependencies are expensive, and should be used only by the active context.
 from nltk.tokenize import sent_tokenize
 from simplemma import is_known, text_lemmatizer  # type: ignore
+
+
+# Prevent anyone else from modifying the context while this lock is held.
+class ContextLock:
+    def __init__(self, lock: Lock, timeout: float = 1.0) -> None:
+        if not lock.acquire(timeout=timeout):
+            raise RuntimeError('unable to acquire unique lock on context')
+
+        self._lock: Optional[Lock] = lock
+
+    def release(self) -> None:
+        if self._lock is None:
+            raise RuntimeError('cannot release lock twice')
+        self._lock.release()
+        self._lock = None
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, _, __, ___) -> None:
+        self.release()
 
 
 class _Context:
     def __init__(self) -> None:
         self._lang = 'en'
+        self._lock = Lock()
+
+    # Acquire a lock on this context, preventing anyone else from doing the same.
+    def lock(self, lang: Optional[str]) -> ContextLock:
+        result = ContextLock(self._lock)
+        if lang is not None:
+            self._set_lang(lang)
+        return result
 
     @property
     def lang(self) -> str:
         return self._lang
-
-    @lang.setter
-    def lang(self, lang: str) -> None:
-        if lang not in _LANG_LANGUAGE_MAP:
-            raise ValueError(f'unrecognized lang: {lang}')
-        self._lang = lang
 
     @property
     def language(self) -> str:
@@ -31,6 +56,11 @@ class _Context:
 
     def iter_sentences(self, text: str) -> Iterable[str]:
         yield from sent_tokenize(text, self.language)
+
+    def _set_lang(self, lang: str) -> None:
+        if lang not in _LANG_LANGUAGE_MAP:
+            raise ValueError(f'unrecognized lang: {lang}')
+        self._lang = lang
 
 
 # Create a single static instance.
