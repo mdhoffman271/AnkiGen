@@ -8,20 +8,20 @@ from ankigen.src.study.context import ActiveContext
 from ankigen.src.study.sample import Sample
 
 
-def iter_samples_from_kaikki(path: str) -> Iterable[Sample]:
-    needle = f'"lang_code": "{ActiveContext.lang}"'
+def iter_samples_from_kaikki(context: ActiveContext, path: str) -> Iterable[Sample]:
+    needle = f'"lang_code": "{context.lang}"'
     with gzip.open(path, 'rt', encoding='utf8') as file:
         for line in file:
             if needle in line:
                 data = json.loads(line)
                 lang = data.get('lang_code', None)
-                if lang != ActiveContext.lang:
+                if lang != context.lang:
                     continue
                 word = data.get('word', None)
                 if word is None:
                     continue
                 url = get_url_from_text(word, lang)
-                yield Sample(lang, clean(word), url)
+                yield Sample(context, lang, clean(word), url)
                 for sense in data.get('senses', []):
                     for example in sense.get('examples', []):
                         text = example.get('text', None)
@@ -30,4 +30,4 @@ def iter_samples_from_kaikki(path: str) -> Iterable[Sample]:
                             english = example.get('english', None)
                             if english is not None:
                                 english = clean(english)
-                            yield Sample(text, url, english)
+                            yield Sample(context, text, url, english)

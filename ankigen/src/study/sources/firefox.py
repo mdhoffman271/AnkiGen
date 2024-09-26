@@ -2,6 +2,7 @@ import sqlite3
 from typing import Iterable
 
 from ankigen.src.data.wiktionary import get_text_from_url, is_wiktionary_url
+from ankigen.src.study.context import ActiveContext
 from ankigen.src.study.interest import Interest
 
 
@@ -19,6 +20,6 @@ def iter_urls_from_firefox_wiktionary(path: str, start_time=float('-inf'), end_t
     conn.close()
 
 
-def iter_interests_from_firefox_wiktionary(path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[Interest]:
+def iter_interests_from_firefox_wiktionary(context: ActiveContext, path: str, start_time=float('-inf'), end_time=float('inf')) -> Iterable[Interest]:
     for url in iter_urls_from_firefox_wiktionary(path, start_time, end_time):
-        yield Interest.from_text(get_text_from_url(url))
+        yield Interest.from_text(context, get_text_from_url(url))

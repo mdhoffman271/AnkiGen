@@ -1,5 +1,6 @@
 from typing import Optional
 
+from ankigen.src.study.context import ActiveContext
 from ankigen.src.study.lemmatization import Lemmatization
 
 SINGLE_WORD_EFFORT = 30.0
@@ -7,11 +8,11 @@ MINIMUM_EFFORT = 10.0
 
 
 class Sample:
-    def __init__(self, text: str, source: Optional[str] = None, english: Optional[str] = None) -> None:
+    def __init__(self, context: ActiveContext, text: str, source: Optional[str] = None, english: Optional[str] = None) -> None:
         self._text = text
         self._source = source
         self._english = english
-        self._lemmatization = Lemmatization.from_text(text)
+        self._lemmatization = Lemmatization.from_text(context, text)
         self._effort = _calc_effort(self._lemmatization)
 
     @property

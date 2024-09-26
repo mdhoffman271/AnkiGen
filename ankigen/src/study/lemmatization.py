@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from ankigen.src.study.context import ActiveContext
@@ -13,5 +15,5 @@ class Lemmatization:
         return tuple(sorted(set(self.lemmas)))
 
     @staticmethod
-    def from_text(text: str) -> 'Lemmatization':
-        return Lemmatization(tuple(ActiveContext.iter_lemmas(text)))
+    def from_text(context: ActiveContext, text: str) -> Lemmatization:
+        return Lemmatization(tuple(context.iter_lemmas(text)))
