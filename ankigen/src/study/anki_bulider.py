@@ -24,9 +24,6 @@ class AnkiBuilder:
         self._sample_generators: list[Callable[[], Iterable[Sample]]] = []
 
     def generate(self, path: str) -> None:
-        if path.endswith('/') or path.endswith('\\'):
-            path += f'{self._context.lang}.txt'
-
         store = Store()
         self._log_func(f"starting generate (lang: '{self._context.lang}') ...")
         samples = store.filter(self._iter_samples(), self._iter_interests())
