@@ -10,7 +10,7 @@ from ankigen.src.study.sources.epub import iter_samples_from_epub
 from ankigen.src.study.sources.firefox import iter_interests_from_firefox_wiktionary
 from ankigen.src.study.sources.kaikki import iter_samples_from_kaikki
 from ankigen.src.study.sources.text import iter_samples_from_text
-from ankigen.src.study.store import Store
+from ankigen.src.study.prioritize import prioritize
 
 
 class AnkiBuilder:
@@ -24,9 +24,8 @@ class AnkiBuilder:
         self._sample_generators: list[Callable[[], Iterable[Sample]]] = []
 
     def generate(self, path: str) -> None:
-        store = Store()
         self._log_func(f"starting generate (lang: '{self._context.lang}') ...")
-        samples = store.filter(self._iter_samples(), self._iter_interests())
+        samples = prioritize(self._iter_samples(), self._iter_interests())
         self._log_func(f"saving samples to {path} ...")
         save_samples_as_anki(path, samples, self._context.lang)
         self._log_func("done")
