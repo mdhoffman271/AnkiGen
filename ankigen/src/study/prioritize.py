@@ -5,24 +5,26 @@ from ankigen.src.study.lemmatization import LemmaCollection, Lemmatization
 from ankigen.src.study.sample import Sample
 
 
-def prioritize(samples: Iterable[Sample], interests: Iterable[Interest], samples_per_interest=3) -> Iterable[Sample]:
-    cache: dict[Interest, list[Sample]] = {i: list() for i in interests if len(i.lemmas) > 0}
+def prioritize(samples: Iterable[Sample], interests: Iterable[Interest], max_sample_count=3) -> dict[Sample, set[Interest]]:
+    interest_to_samples_dict = _match_interest_to_samples(samples, interests, max_sample_count)
+    sample_to_interest_dict = _invert(interest_to_samples_dict)
+    return sample_to_interest_dict
+
+
+def _match_interest_to_samples(samples: Iterable[Sample], interests: Iterable[Interest], max_sample_count=3) -> dict[Interest, set[Sample]]:
+    cache: dict[Interest, list[Sample]] = {i: list() for i in interests}
 
     # Map each interest to some samples.
     for sample in samples:
         sample_lemma_set = set(sample.lemmatization.lemmas)
         for interest in cache.keys():
             if _is_match(sample_lemma_set, interest.lemmas):
-                cache[interest] = list(_discard_extras(cache[interest] + [sample], samples_per_interest))
+                cache[interest] = list(_discard_extras(cache[interest] + [sample], max_sample_count))
 
-    # Remove duplicate samples.
-    unique_samples = set()
-    unique_samples.update(*cache.values())
-
-    return sorted(unique_samples, key=lambda s: s.effort)
+    return {i: set(s) for (i, s) in cache.items()}
 
 
-def _discard_extras(samples: Iterable[Sample], max_count) -> Iterable[Sample]:
+def _discard_extras(samples: Iterable[Sample], max_sample_count) -> Iterable[Sample]:
     # Remove duplicates.
     cache: dict[Lemmatization, Sample] = dict()
     for sample in samples:
@@ -31,7 +33,7 @@ def _discard_extras(samples: Iterable[Sample], max_count) -> Iterable[Sample]:
         cache[key] = _better_sample(sample, other)
 
     # Shorten to max_samples.
-    return sorted(cache.values(), key=lambda x: x.effort)[:max_count]
+    return sorted(cache.values(), key=lambda x: x.effort)[:max_sample_count]
 
 
 def _is_match(sample_lemma_set: set[str], interest_lemmas: LemmaCollection) -> bool:
@@ -63,3 +65,11 @@ def _data_score(sample: Sample) -> int:
     if sample.english is not None:
         score += 1
     return score
+
+
+def _invert(data: dict[Interest, set[Sample]]) -> dict[Sample, set[Interest]]:
+    result: dict[Sample, set[Interest]] = dict()
+    for interest, samples in data.items():
+        for sample in samples:
+            result.setdefault(sample, set()).add(interest)
+    return result

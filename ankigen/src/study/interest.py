@@ -11,3 +11,6 @@ class Interest:
     @staticmethod
     def from_text(context: ActiveContext, text: str) -> 'Interest':
         return Interest(Lemmatization.from_text(context, text).unique())
+
+    def __str__(self) -> str:
+        return ' + '.join(self.lemmas)

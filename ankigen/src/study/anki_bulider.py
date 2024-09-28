@@ -1,16 +1,36 @@
 import time
+from dataclasses import dataclass
 from glob import iglob
 from typing import Callable, Iterable, Optional, Self
 
 from ankigen.src.data.anki import save_samples_as_anki
 from ankigen.src.study.context import ActiveContext
 from ankigen.src.study.interest import Interest
+from ankigen.src.study.prioritize import prioritize
 from ankigen.src.study.sample import Sample
 from ankigen.src.study.sources.epub import iter_samples_from_epub
 from ankigen.src.study.sources.firefox import iter_interests_from_firefox_wiktionary
 from ankigen.src.study.sources.kaikki import iter_samples_from_kaikki
 from ankigen.src.study.sources.text import iter_samples_from_text
-from ankigen.src.study.prioritize import prioritize
+
+
+@dataclass()
+class AnkiResult:
+    lang: str
+    interests: set[Interest]
+    sample_to_interests_map: dict[Sample, set[Interest]]
+
+    def samples(self) -> Iterable[Sample]:
+        return self.sample_to_interests_map.keys()
+
+    def satisfied_interests(self) -> set[Interest]:
+        return {interest for interests in self.sample_to_interests_map.values() for interest in interests}
+
+    def unsatisfied_interests(self) -> set[Interest]:
+        return self.interests.difference(self.satisfied_interests())
+
+    def save(self, path: str) -> None:
+        save_samples_as_anki(path, sorted(self.samples(), key=lambda s: s.effort), self.lang)
 
 
 class AnkiBuilder:
@@ -23,12 +43,12 @@ class AnkiBuilder:
         self._interest_generators: list[Callable[[], Iterable[Interest]]] = []
         self._sample_generators: list[Callable[[], Iterable[Sample]]] = []
 
-    def generate(self, path: str) -> None:
-        self._log_func(f"starting generate (lang: '{self._context.lang}') ...")
-        samples = prioritize(self._iter_samples(), self._iter_interests())
-        self._log_func(f"saving samples to {path} ...")
-        save_samples_as_anki(path, samples, self._context.lang)
-        self._log_func("done")
+    def build(self) -> AnkiResult:
+        self._log_func(f"starting build (lang: '{self._context.lang}') ...")
+        interests = set(i for i in self._iter_interests() if len(i.lemmas) > 0)
+        sample_to_interests_map = prioritize(self._iter_samples(), interests)
+        self._log_func(f'finished build')
+        return AnkiResult(self._context.lang, interests, sample_to_interests_map)
 
     def with_firefox_wiktionary(self, path: str, past_day_count: float) -> Self:
         def func() -> Iterable[Interest]:
