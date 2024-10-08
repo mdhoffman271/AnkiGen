@@ -11,10 +11,11 @@ def main():
 
             anki = (
                 AnkiBuilder(context, log_func=print)
-                .with_epub(f'./data/epub/{lang}/**/*.epub')
-                .with_kaikki('./data/kaikki/raw-wiktextract-data.jsonl.gz')
-                .with_text(f'./data/text/{lang}/**/*.txt')
-                .with_firefox_wiktionary('./data/firefox/places.sqlite', 61.0)
+                .with_epub_samples(f'./data/epub/{lang}/**/*.epub')
+                .with_kaikki_samples('./data/kaikki/raw-wiktextract-data.jsonl.gz')
+                .with_text_samples(f'./data/text/sample/{lang}/**/*.txt')
+                .with_text_interests(f'./data/text/interest/{lang}/**/*.txt')
+                .with_firefox_wiktionary_interests('./data/firefox/places.sqlite', 61.0)
                 .build()
             )
 
