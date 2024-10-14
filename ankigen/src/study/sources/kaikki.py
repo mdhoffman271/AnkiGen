@@ -21,7 +21,7 @@ def iter_samples_from_kaikki(context: ActiveContext, path: str) -> Iterable[Samp
                 if word is None:
                     continue
                 url = get_url_from_text(word, lang)
-                yield Sample(context, lang, clean(word), url)
+                yield Sample(context, clean(word), url)
                 for sense in data.get('senses', []):
                     for example in sense.get('examples', []):
                         text = example.get('text', None)
